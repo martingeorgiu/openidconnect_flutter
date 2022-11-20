@@ -25,8 +25,9 @@ abstract class TokenRequest {
     var map = {
       "client_id": clientId,
       "grant_type": grantType,
-      "scope": scopes.join(" "),
     };
+
+    if (scopes.isNotEmpty) map = {"scope": scopes.join(" "), ...map};
 
     if (clientSecret != null) map = {"client_secret": clientSecret!, ...map};
 
