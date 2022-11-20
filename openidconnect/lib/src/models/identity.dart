@@ -13,7 +13,7 @@ class OpenIdIdentity extends AuthorizationResponse {
 
   OpenIdIdentity({
     required String accessToken,
-    required DateTime expiresAt,
+    DateTime? expiresAt,
     required String idToken,
     required String tokenType,
     String? refreshToken,
@@ -107,7 +107,7 @@ class OpenIdIdentity extends AuthorizationResponse {
     await _storage.write(key: _TOKEN_TYPE_KEY, value: this.tokenType);
     await _storage.write(
         key: _EXPIRES_ON_KEY,
-        value: this.expiresAt.millisecondsSinceEpoch.toString());
+        value: this.expiresAt?.millisecondsSinceEpoch.toString());
     await this.state == null
         ? _storage.delete(key: _STATE_KEY)
         : _storage.write(key: _STATE_KEY, value: this.state);

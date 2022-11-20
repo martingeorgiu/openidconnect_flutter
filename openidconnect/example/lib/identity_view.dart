@@ -56,7 +56,7 @@ class IdentityView extends StatelessWidget {
                   style: captionTheme,
                 ),
                 Text(
-                  identity.expiresAt.toIso8601String(),
+                  identity.expiresAt?.toIso8601String() ?? 'no datetime',
                 )
               ],
             ),

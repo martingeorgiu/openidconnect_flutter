@@ -115,10 +115,12 @@ class OpenIdConnectClient {
   bool get initializationComplete => _isInitializationComplete;
 
   bool get hasTokenExpired =>
-      _identity!.expiresAt.difference(DateTime.now().toUtc()).isNegative;
+      _identity!.expiresAt?.difference(DateTime.now().toUtc()).isNegative ??
+      false;
 
   bool get isTokenAboutToExpire {
-    var refreshTime = _identity!.expiresAt.difference(DateTime.now().toUtc());
+    var refreshTime =
+        _identity!.expiresAt?.difference(DateTime.now().toUtc()) ?? Duration();
     refreshTime -= Duration(minutes: 1);
     return refreshTime.isNegative;
   }
@@ -359,7 +361,8 @@ class OpenIdConnectClient {
 
       if (autoRefresh) {
         final refreshTime = _identity!.expiresAt
-            .difference(DateTime.now().subtract(Duration(minutes: 1)));
+                ?.difference(DateTime.now().subtract(Duration(minutes: 1))) ??
+            Duration();
 
         _autoRenewTimer = Future.delayed(refreshTime, refresh);
       }
@@ -398,7 +401,9 @@ class OpenIdConnectClient {
       return await refresh(
           raiseEvents: false); //This will set the timer itself.
     } else {
-      var refreshTime = _identity!.expiresAt.difference(DateTime.now().toUtc());
+      var refreshTime =
+          _identity!.expiresAt?.difference(DateTime.now().toUtc()) ??
+              Duration();
 
       refreshTime -= Duration(minutes: 1);
 
