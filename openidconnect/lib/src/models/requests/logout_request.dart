@@ -1,7 +1,7 @@
 part of openidconnect;
 
 class LogoutRequest {
-  final String idToken;
+  final String? idToken;
   final String? postLogoutRedirectUrl;
   final String? state;
   final OpenIdConfiguration configuration;
@@ -14,7 +14,8 @@ class LogoutRequest {
   });
 
   Map<String, String> toMap() {
-    var map = {"id_token_hint": idToken};
+    var map = <String, String>{};
+    if (idToken != null) map = {"id_token_hint": idToken!, ...map};
 
     if (postLogoutRedirectUrl != null)
       map = {"post_logout_redirect_url": postLogoutRedirectUrl!, ...map};

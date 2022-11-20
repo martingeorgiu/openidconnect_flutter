@@ -1,9 +1,9 @@
 part of openidconnect;
 
 class AuthorizationResponse extends TokenResponse {
-  final String accessToken;
+  final String? accessToken;
   final String? refreshToken;
-  final String idToken;
+  final String? idToken;
   final String? state;
 
   AuthorizationResponse({
@@ -35,9 +35,9 @@ class AuthorizationResponse extends TokenResponse {
     }
 
     return AuthorizationResponse(
-      accessToken: json["access_token"].toString(),
-      tokenType: json["token_type"].toString(),
-      idToken: json["id_token"].toString(),
+      accessToken: json["access_token"]?.toString(),
+      tokenType: json["token_type"]?.toString() ?? 'bearer',
+      idToken: json["id_token"]?.toString(),
       refreshToken: json["refresh_token"]?.toString(),
       expiresAt: getExpiredAt(),
       additionalProperties: json,

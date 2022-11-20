@@ -12,9 +12,9 @@ class OpenIdIdentity extends AuthorizationResponse {
   late String sub;
 
   OpenIdIdentity({
-    required String accessToken,
+    String? accessToken,
     DateTime? expiresAt,
-    required String idToken,
+    String? idToken,
     required String tokenType,
     String? refreshToken,
     String? state,
@@ -26,7 +26,8 @@ class OpenIdIdentity extends AuthorizationResponse {
           refreshToken: refreshToken,
           state: state,
         ) {
-    this.claims = JwtDecoder.decode(idToken);
+    this.claims =
+        idToken == null ? <String, dynamic>{} : JwtDecoder.decode(idToken);
 
     this.sub = claims["sub"].toString();
   }
