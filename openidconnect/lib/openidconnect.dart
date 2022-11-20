@@ -72,7 +72,7 @@ class OpenIdConnect {
 
   static Future<AuthorizationResponse?> authorizeInteractive({
     required BuildContext context,
-    required String title,
+    String? title,
     required InteractiveAuthorizationRequest request,
   }) async {
     late String? responseUrl;
@@ -90,6 +90,7 @@ class OpenIdConnect {
         redirectUrl: request.redirectUrl,
         popupHeight: request.popupHeight,
         popupWidth: request.popupWidth,
+        useBottomDialog: true,
       );
     } else if (kIsWeb) {
       final storage = FlutterSecureStorage();
@@ -100,7 +101,7 @@ class OpenIdConnect {
 
       responseUrl = await _platform.authorizeInteractive(
         context: context,
-        title: title,
+        title: title ?? '',
         authorizationUrl: uri.toString(),
         redirectUrl: request.redirectUrl,
         popupHeight: request.popupHeight,

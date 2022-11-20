@@ -18,6 +18,7 @@ class InteractiveAuthorizationRequest extends TokenRequest {
     required Iterable<String> scopes,
     required OpenIdConfiguration configuration,
     required bool autoRefresh,
+    bool useBase64ForCodeVerifier = false,
     String? loginHint,
     Iterable<String>? prompts,
     Map<String, String>? additionalParameters,
@@ -25,11 +26,21 @@ class InteractiveAuthorizationRequest extends TokenRequest {
     int popupHeight = 600,
     bool useWebPopup = true,
   }) async {
-    final codeVerifier = base64Url
-        .encode(utf8.encode(List.generate(
+    String getCodeVerifier() {
+      if (useBase64ForCodeVerifier) {
+        return base64Url
+            .encode(utf8.encode(List.generate(128,
+                    (i) => _charset[Random.secure().nextInt(_charset.length)])
+                .join()))
+            .replaceAll('=', '');
+      } else {
+        return List.generate(
                 128, (i) => _charset[Random.secure().nextInt(_charset.length)])
-            .join()))
-        .replaceAll('=', '');
+            .join();
+      }
+    }
+
+    final codeVerifier = getCodeVerifier();
 
     final sha256 = crypto.Sha256();
 
