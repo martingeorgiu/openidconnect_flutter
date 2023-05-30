@@ -4,7 +4,7 @@ version: 1.0.25
 homepage: https://github.com/Concerti-IO/openidconnect_flutter
 
 environment:
-  sdk: ">=2.18.0 <3.0.0"
+  sdk: ">=2.18.0 <4.0.0"
   flutter: ">=3.0.0"
 
 dependencies:
@@ -15,7 +15,7 @@ dependencies:
   openidconnect_platform_interface: ^1.0.13
   openidconnect_web: ^1.0.21
   # openidconnect_windows: ^0.0.6
-  flutter_secure_storage: ^6.0.0
+  flutter_secure_storage: ^8.0.0
   jwt_decoder: ^2.0.1
 
   cryptography: ^2.0.5
