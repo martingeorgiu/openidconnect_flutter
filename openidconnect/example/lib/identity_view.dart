@@ -23,7 +23,7 @@ class IdentityView extends StatelessWidget {
                   style: captionTheme,
                 ),
                 Text(
-                  identity.accessToken,
+                  identity.accessToken ?? 'No Access Token',
                 )
               ],
             ),
@@ -34,7 +34,7 @@ class IdentityView extends StatelessWidget {
                   style: captionTheme,
                 ),
                 Text(
-                  identity.idToken,
+                  identity.idToken ?? 'No Identity Token',
                 )
               ],
             ),

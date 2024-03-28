@@ -276,7 +276,8 @@ class OpenIdConnectClient {
     if (_autoRenewTimer != null) _autoRenewTimer = null;
 
     if (_identity == null) return;
-
+    final accessToken = _identity!.accessToken;
+    if (accessToken == null) return;
     try {
       //Make sure we have the discovery information
       await _verifyDiscoveryDocument();
@@ -286,7 +287,7 @@ class OpenIdConnectClient {
           clientId: clientId,
           clientSecret: clientSecret,
           configuration: configuration!,
-          token: _identity!.accessToken,
+          token: accessToken,
           tokenType: TokenType.accessToken,
         ),
       );

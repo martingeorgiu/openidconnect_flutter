@@ -10,6 +10,9 @@ class OpenIdConnectAndroidiOS {
     required int popupHeight,
     bool useBottomDialog = false,
   }) async {
+    final controller = flutterWebView.WebViewController()
+      ..setJavaScriptMode(flutterWebView.JavaScriptMode.unrestricted);
+
     if (useBottomDialog) {
       final result = await showModalBottomSheet<String?>(
         context: context,
@@ -17,7 +20,8 @@ class OpenIdConnectAndroidiOS {
         enableDrag: false,
         isScrollControlled: true,
         builder: (_) {
-          return _OpenIdConnectBottomSheet(authorizationUrl, redirectUrl);
+          return _OpenIdConnectBottomSheet(
+              authorizationUrl, redirectUrl, controller);
         },
       );
 
@@ -40,14 +44,18 @@ class OpenIdConnectAndroidiOS {
                   min(popupWidth.toDouble(), MediaQuery.of(context).size.width),
               height: min(
                   popupHeight.toDouble(), MediaQuery.of(context).size.height),
-              child: flutterWebView.WebView(
-                javascriptMode: flutterWebView.JavascriptMode.unrestricted,
-                initialUrl: authorizationUrl,
-                onPageFinished: (url) {
-                  if (url.startsWith(redirectUrl)) {
-                    Navigator.pop(dialogContext, url);
-                  }
-                },
+              child: flutterWebView.WebViewWidget(
+                controller: controller
+                  ..setNavigationDelegate(
+                    flutterWebView.NavigationDelegate(
+                      onPageFinished: (String url) {
+                        if (url.startsWith(redirectUrl)) {
+                          Navigator.pop(dialogContext, url);
+                        }
+                      },
+                    ),
+                  )
+                  ..loadRequest(Uri.parse(authorizationUrl)),
               ),
             ),
             title: title != null ? Text(title) : SizedBox.shrink(),
@@ -64,7 +72,9 @@ class OpenIdConnectAndroidiOS {
 class _OpenIdConnectBottomSheet extends StatefulWidget {
   final String authorizationUrl;
   final String redirectUrl;
-  const _OpenIdConnectBottomSheet(this.authorizationUrl, this.redirectUrl);
+  final flutterWebView.WebViewController controller;
+  const _OpenIdConnectBottomSheet(
+      this.authorizationUrl, this.redirectUrl, this.controller);
 
   @override
   State<_OpenIdConnectBottomSheet> createState() =>
@@ -97,18 +107,21 @@ class __OpenIdConnectBottomSheetState extends State<_OpenIdConnectBottomSheet> {
           ),
           Expanded(
               child: showWebView
-                  ? flutterWebView.WebView(
-                      javascriptMode:
-                          flutterWebView.JavascriptMode.unrestricted,
-                      initialUrl: widget.authorizationUrl,
-                      onPageStarted: (url) {
-                        if (url.startsWith(widget.redirectUrl)) {
-                          setState(() {
-                            showWebView = false;
-                          });
-                          Navigator.pop(context, url);
-                        }
-                      },
+                  ? flutterWebView.WebViewWidget(
+                      controller: widget.controller
+                        ..setNavigationDelegate(
+                          flutterWebView.NavigationDelegate(
+                            onPageFinished: (String url) {
+                              if (url.startsWith(widget.redirectUrl)) {
+                                setState(() {
+                                  showWebView = false;
+                                });
+                                Navigator.pop(context, url);
+                              }
+                            },
+                          ),
+                        )
+                        ..loadRequest(Uri.parse(widget.authorizationUrl)),
                     )
                   : SizedBox.shrink()),
         ],
