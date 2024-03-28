@@ -5,7 +5,7 @@ class TokenResponse {
   final Map<String, dynamic>? additionalProperties;
   final DateTime? expiresAt;
 
-  TokenResponse({
+  const TokenResponse({
     required this.tokenType,
     this.expiresAt,
     this.additionalProperties,
