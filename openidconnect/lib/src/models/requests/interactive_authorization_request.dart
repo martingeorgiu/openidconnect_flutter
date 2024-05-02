@@ -2,7 +2,7 @@ part of openidconnect;
 
 class InteractiveAuthorizationRequest extends TokenRequest {
   static const String _charset =
-      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~';
+      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
   final int popupWidth;
   final int popupHeight;
@@ -25,6 +25,7 @@ class InteractiveAuthorizationRequest extends TokenRequest {
     required Iterable<String> scopes,
     required OpenIdConfiguration configuration,
     required bool autoRefresh,
+    bool useBase64ForCodeVerifier = false,
     String? loginHint,
     Iterable<String>? prompts,
     Map<String, String>? additionalParameters,
@@ -32,13 +33,26 @@ class InteractiveAuthorizationRequest extends TokenRequest {
     int popupHeight = 600,
     bool useWebPopup = true,
   }) async {
-    final codeVerifier = List.generate(
-        128, (i) => _charset[Random.secure().nextInt(_charset.length)]).join();
+    String getCodeVerifier() {
+      if (useBase64ForCodeVerifier) {
+        return base64Url
+            .encode(utf8.encode(List.generate(128,
+                    (i) => _charset[Random.secure().nextInt(_charset.length)])
+                .join()))
+            .replaceAll('=', '');
+      } else {
+        return List.generate(
+                128, (i) => _charset[Random.secure().nextInt(_charset.length)])
+            .join();
+      }
+    }
+
+    final codeVerifier = getCodeVerifier();
 
     final sha256 = crypto.Sha256();
 
     final codeChallenge = base64Url
-        .encode((await sha256.hash(ascii.encode(codeVerifier))).bytes)
+        .encode((await sha256.hash(utf8.encode(codeVerifier))).bytes)
         .replaceAll('=', '');
 
     return InteractiveAuthorizationRequest._(

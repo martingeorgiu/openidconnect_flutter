@@ -15,7 +15,6 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:retry/retry.dart';
 import 'package:webview_flutter/webview_flutter.dart' as flutterWebView;
 import 'package:url_launcher/url_launcher.dart';
-import 'package:webview_flutter/webview_flutter.dart';
 
 part './src/openidconnect_client.dart';
 part './src/android_ios.dart';
@@ -75,7 +74,7 @@ class OpenIdConnect {
 
   static Future<AuthorizationResponse?> authorizeInteractive({
     required BuildContext context,
-    required String title,
+    String? title,
     required InteractiveAuthorizationRequest request,
   }) async {
     late String? responseUrl;
@@ -97,6 +96,7 @@ class OpenIdConnect {
         redirectUrl: request.redirectUrl,
         popupHeight: request.popupHeight,
         popupWidth: request.popupWidth,
+        useBottomDialog: true,
       );
     } else if (kIsWeb) {
       final storage = FlutterSecureStorage();
@@ -107,7 +107,7 @@ class OpenIdConnect {
 
       responseUrl = await _platform.authorizeInteractive(
         context: context,
-        title: title,
+        title: title ?? '',
         authorizationUrl: uri.toString(),
         redirectUrl: request.redirectUrl,
         popupHeight: request.popupHeight,
