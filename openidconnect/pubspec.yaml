@@ -23,9 +23,11 @@ dependencies:
   url_launcher: ^6.2.4
   http: ^1.2.0
   retry: ^3.1.2
+  flutter_inappwebview: ^6.0.0
 
   # TODO Remove these once native implementations can be added. Refactor so that the native implementations don't need to do the full cycle through.
   webview_flutter: ^4.5.0
+  basic_utils: ^5.7.0
 
 dev_dependencies:
   flutter_lints: ^3.0.1

@@ -1,6 +1,6 @@
 part of openidconnect;
 
-Future<Map<String, dynamic>?> httpRetry<T extends http.Response>(
+Future<Map<String, dynamic>?> httpRetry<T extends http_package.Response>(
   FutureOr<T> Function() fn, {
   Duration delayFactor = const Duration(milliseconds: 200),
   double randomizationFactor = 0.25,

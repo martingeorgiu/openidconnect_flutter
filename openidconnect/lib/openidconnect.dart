@@ -5,46 +5,52 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
-import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:basic_utils/basic_utils.dart' show X509Utils;
 import 'package:cryptography/cryptography.dart' as crypto;
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart'
+    hide AndroidOptions;
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:http/http.dart' as http_package;
+import 'package:http/io_client.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:openidconnect_platform_interface/openidconnect_platform_interface.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:retry/retry.dart';
-import 'package:webview_flutter/webview_flutter.dart' as flutterWebView;
 import 'package:url_launcher/url_launcher.dart';
+import 'package:webview_flutter/webview_flutter.dart' as flutterWebView;
 
-part './src/openidconnect_client.dart';
 part './src/android_ios.dart';
 part './src/helpers.dart';
-
-part './src/models/identity.dart';
 part './src/models/event.dart';
-
+part './src/models/identity.dart';
+part './src/openidconnect_client.dart';
 part 'src/config/openidconfiguration.dart';
-
+part 'src/models/requests/device_authorization_request.dart';
 part 'src/models/requests/interactive_authorization_request.dart';
-part 'src/models/requests/password_authorization_request.dart';
-part 'src/models/requests/refresh_request.dart';
 part 'src/models/requests/logout_request.dart';
 part 'src/models/requests/logout_token_request.dart';
+part 'src/models/requests/password_authorization_request.dart';
+part 'src/models/requests/refresh_request.dart';
 part 'src/models/requests/revoke_token_request.dart';
-part 'src/models/requests/device_authorization_request.dart';
-part 'src/models/requests/user_info_request.dart';
 part 'src/models/requests/token_request.dart';
+part 'src/models/requests/user_info_request.dart';
 part 'src/models/requests/user_registration_request.dart';
-
-part 'src/models/responses/token_response.dart';
-part 'src/models/responses/device_code_response.dart';
 part 'src/models/responses/authorization_response.dart';
+part 'src/models/responses/device_code_response.dart';
+part 'src/models/responses/token_response.dart';
 
 final _platform = OpenIdConnectPlatform.instance;
 
 class OpenIdConnect {
+  static var http = IOClient();
+
   static const CODE_VERIFIER_STORAGE_KEY = "openidconnect_code_verifier";
   static const CODE_CHALLENGE_STORAGE_KEY = "openidconnect_code_challenge";
+
+  static void setHttpClient(IOClient newClient) {
+    http = newClient;
+  }
 
   static Future<OpenIdConfiguration> getConfiguration(
       String discoveryDocumentUri) async {
@@ -76,6 +82,16 @@ class OpenIdConnect {
     required BuildContext context,
     String? title,
     required InteractiveAuthorizationRequest request,
+
+    /// Only applicable for Android and iOS
+    /// When specified, we can use one of the certificates for the SSL handshake when the system certificates are dismissing the connection
+    /// Provide the certificate in PEM format with the BEGIN CERTIFICATE and END CERTIFICATE lines
+    List<String>? certificates,
+
+    /// Only applicable when certificates is specified
+    /// When true, the system root certificates are used when verifying the SSL certificate
+    /// When false, only the specified certificate is used, therefore it behaves like certificate pinning
+    bool includeRoots = true,
   }) async {
     late String? responseUrl;
 
@@ -89,15 +105,25 @@ class OpenIdConnect {
 
     //These are special cases for the various different platforms because of limitations in pubspec.yaml
     if (!kIsWeb && (Platform.isIOS || Platform.isAndroid)) {
-      responseUrl = await OpenIdConnectAndroidiOS.authorizeInteractive(
-        context: context,
-        title: title,
-        authorizationUrl: uri.toString(),
-        redirectUrl: request.redirectUrl,
-        popupHeight: request.popupHeight,
-        popupWidth: request.popupWidth,
-        useBottomDialog: true,
-      );
+      if (certificates != null) {
+        responseUrl =
+            await OpenIdConnectAndroidiOS.authorizeInteractiveWithCertificate(
+          authorizationUrl: uri.toString(),
+          redirectUrl: request.redirectUrl,
+          certificates: certificates,
+          includeRoots: includeRoots,
+        );
+      } else {
+        responseUrl = await OpenIdConnectAndroidiOS.authorizeInteractive(
+          context: context,
+          title: title,
+          authorizationUrl: uri.toString(),
+          redirectUrl: request.redirectUrl,
+          popupHeight: request.popupHeight,
+          popupWidth: request.popupWidth,
+          useBottomDialog: true,
+        );
+      }
     } else if (kIsWeb) {
       final storage = FlutterSecureStorage();
       await storage.write(
