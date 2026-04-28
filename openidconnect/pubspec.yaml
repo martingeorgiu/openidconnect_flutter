@@ -4,8 +4,8 @@ version: 1.0.28
 homepage: https://github.com/4D-Technologies/openidconnect_flutter
 
 environment:
-  sdk: '>=3.1.4 <4.0.0'
-  flutter: '>=3.1.0'
+  sdk: ">=3.1.4 <4.0.0"
+  flutter: ">=3.1.0"
 
 dependencies:
   flutter:
@@ -15,7 +15,7 @@ dependencies:
   openidconnect_platform_interface: ^1.0.14
   openidconnect_web: ^1.0.22
   # openidconnect_windows: ^0.0.6
-  flutter_secure_storage: ^9.0.0
+  flutter_secure_storage: ^10.0.0
   jwt_decoder: ^2.0.1
 
   cryptography: ^2.7.0
