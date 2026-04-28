@@ -114,10 +114,12 @@ class OpenIdConnectClient {
   bool get initializationComplete => _isInitializationComplete;
 
   bool get hasTokenExpired =>
-      _identity!.expiresAt.difference(DateTime.now().toUtc()).isNegative;
+      _identity!.expiresAt?.difference(DateTime.now().toUtc()).isNegative ??
+      false;
 
   bool get isTokenAboutToExpire {
-    var refreshTime = _identity!.expiresAt.difference(DateTime.now().toUtc());
+    var refreshTime =
+        _identity!.expiresAt?.difference(DateTime.now().toUtc()) ?? Duration();
     refreshTime -= Duration(minutes: 1);
     return refreshTime.isNegative;
   }
@@ -274,7 +276,8 @@ class OpenIdConnectClient {
     if (_autoRenewTimer != null) _autoRenewTimer = null;
 
     if (_identity == null) return;
-
+    final accessToken = _identity!.accessToken;
+    if (accessToken == null) return;
     try {
       //Make sure we have the discovery information
       await _verifyDiscoveryDocument();
@@ -284,7 +287,7 @@ class OpenIdConnectClient {
           clientId: clientId,
           clientSecret: clientSecret,
           configuration: configuration!,
-          token: _identity!.accessToken,
+          token: accessToken,
           tokenType: TokenType.accessToken,
         ),
       );
@@ -394,8 +397,9 @@ class OpenIdConnectClient {
       await _completeLogin(response);
 
       if (autoRefresh) {
-        var refreshTime = _identity!.expiresAt.difference(DateTime.now().toUtc());
-        refreshTime -= Duration(minutes: 1);
+        final refreshTime = _identity!.expiresAt
+                ?.difference(DateTime.now().subtract(Duration(minutes: 1))) ??
+            Duration();
 
         _autoRenewTimer = Future.delayed(refreshTime, refresh);
       }
@@ -437,7 +441,9 @@ class OpenIdConnectClient {
       return await refresh(
           raiseEvents: false); //This will set the timer itself.
     } else {
-      var refreshTime = _identity!.expiresAt.difference(DateTime.now().toUtc());
+      var refreshTime =
+          _identity!.expiresAt?.difference(DateTime.now().toUtc()) ??
+              Duration();
 
       refreshTime -= Duration(minutes: 1);
 

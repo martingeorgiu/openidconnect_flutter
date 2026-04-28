@@ -12,9 +12,9 @@ class OpenIdIdentity extends AuthorizationResponse {
   late String sub;
 
   OpenIdIdentity({
-    required String accessToken,
-    required DateTime expiresAt,
-    required String idToken,
+    String? accessToken,
+    DateTime? expiresAt,
+    String? idToken,
     required String tokenType,
     String? refreshToken,
     String? state,
@@ -26,7 +26,8 @@ class OpenIdIdentity extends AuthorizationResponse {
           refreshToken: refreshToken,
           state: state,
         ) {
-    this.claims = JwtDecoder.decode(idToken);
+    this.claims =
+        idToken == null ? <String, dynamic>{} : JwtDecoder.decode(idToken);
 
     this.sub = claims["sub"].toString();
   }
@@ -107,7 +108,7 @@ class OpenIdIdentity extends AuthorizationResponse {
     await _storage.write(key: _TOKEN_TYPE_KEY, value: this.tokenType);
     await _storage.write(
         key: _EXPIRES_ON_KEY,
-        value: this.expiresAt.millisecondsSinceEpoch.toString());
+        value: this.expiresAt?.millisecondsSinceEpoch.toString());
     await this.state == null
         ? _storage.delete(key: _STATE_KEY)
         : _storage.write(key: _STATE_KEY, value: this.state);
